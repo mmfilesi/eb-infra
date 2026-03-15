@@ -1,0 +1,37 @@
+services:
+  cms:
+    build:
+      context: ../eb-cms
+      dockerfile: Dockerfile
+    ports:
+      - "1337:1337"
+    volumes:
+      - cms-data:/app/.tmp
+    env_file:
+      - ../eb-cms/.env
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ../eb-services
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../eb-services/.env.dev
+    restart: unless-stopped
+
+  nginx:
+    # image: nginx:latest
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - cms
+    restart: unless-stopped
+
+volumes:
+  cms-data:

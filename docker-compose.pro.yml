@@ -1,0 +1,32 @@
+services:
+  cms:
+    image: 617524311819.dkr.ecr.eu-west-2.amazonaws.com/eb-cms:latest
+    ports:
+      - "1337:1337"
+    volumes:
+      - cms-data:/app/.tmp
+    env_file:
+      - /home/ubuntu/envs/eb-cms.env.pro
+    restart: unless-stopped
+
+  api:
+    image: 617524311819.dkr.ecr.eu-west-2.amazonaws.com/eb-services:latest
+    ports:
+      - "8000:8000"
+    env_file:
+      - /home/ubuntu/envs/eb-services.env.pro
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+      - cms
+    restart: unless-stopped
+
+volumes:
+  cms-data:
